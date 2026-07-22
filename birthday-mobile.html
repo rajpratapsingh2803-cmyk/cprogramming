@@ -1,0 +1,437 @@
+-<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Surprise</title>
+  <style>
+    :root {
+      --pink: #ff75b5;
+      --pink-dark: #8b2f66;
+      --pink-soft: #ffe2ef;
+      --cream: #fffaf4;
+      --text: #5b335d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 243, 250, 0.95) 0%, transparent 35%),
+        radial-gradient(circle at bottom right, rgba(255, 217, 240, 0.95) 0%, transparent 40%),
+        linear-gradient(135deg, #fff7fb 0%, #ffe6ef 45%, #ffd8f3 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      filter: blur(10px);
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 8s ease-in-out infinite alternate;
+    }
+    body::before {
+      background: rgba(255, 117, 181, 0.22);
+      top: -60px;
+      left: -40px;
+    }
+    body::after {
+      background: rgba(138, 211, 255, 0.24);
+      bottom: -70px;
+      right: -30px;
+      animation-duration: 10s;
+      animation-direction: alternate-reverse;
+    }
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(20px, -20px, 0) scale(1.08); }
+    }
+    .page-shell {
+      width: min(100%, 560px);
+      position: relative;
+      z-index: 1;
+    }
+    .screen {
+      width: 100%;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(139,47,102,0.08);
+      border-radius: 28px;
+      padding: clamp(1.1rem, 4vw, 2rem);
+      box-shadow: 0 24px 60px rgba(139,47,102,0.16);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: none;
+      backdrop-filter: blur(12px);
+    }
+    .screen.active { display: block; animation: riseIn 0.6s ease both; }
+    @keyframes riseIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+    .confetti-piece {
+      position:absolute; top:-20px; width:10px; height:16px; border-radius:2px; opacity:0.95;
+      animation: fall 1.6s linear forwards;
+    }
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(320px) translateX(var(--drift, 0px)) rotate(720deg); opacity:0; }
+    }
+    .emoji { font-size: 2.3rem; margin-bottom:.6rem; text-shadow: 0 4px 12px rgba(139,47,102,0.12); }
+    h1 { margin:0 0 .7rem; font-size: clamp(1.8rem, 4vw, 2.7rem); color: var(--pink-dark); letter-spacing: .2px; }
+    p { line-height: 1.65; margin:.6rem 0; }
+    .card {
+      background: linear-gradient(135deg, #fff8fc 0%, #ffe8f1 100%);
+      border: 1px solid rgba(255,117,181,0.2);
+      border-radius: 18px;
+      padding: 1rem;
+      margin: 1rem 0;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 18px rgba(139,47,102,0.07);
+    }
+    .btn {
+      border: none; border-radius: 999px; padding: 0.95rem 1.4rem; font-weight: 700;
+      color: white; background: linear-gradient(135deg, var(--pink), #ffb1d0 100%);
+      cursor: pointer; box-shadow: 0 12px 30px rgba(255,117,181,0.25);
+      margin-top: .5rem; transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(255,117,181,0.3); filter: brightness(1.03); }
+    .btn:active { transform: scale(0.98); }
+    .btn.secondary {
+      background: linear-gradient(135deg, #ffffff, #ffe9f2 100%);
+      color: var(--pink-dark);
+      border: 1px solid rgba(255,117,181,0.24);
+      box-shadow: 0 10px 24px rgba(139,47,102,0.08);
+      margin-top: .7rem;
+    }
+    .mini { font-size: .95rem; color:#9c5d8a; margin-top:.8rem; }
+    .egg-wrap { position:relative; width:min(290px,84vw); height:300px; margin:1rem auto 1.4rem; padding-top: .5rem; }
+    .egg {
+      width:230px;height:270px;margin:0 auto;border-radius:55% 55% 60% 60%;
+      background: radial-gradient(circle at 40% 25%, #fffdf7, #ffe3cc 45%, #ffd5b8 100%);
+      border: 2px solid rgba(179,121,86,0.22);
+      box-shadow: inset -12px -12px 30px rgba(0,0,0,0.12), 0 22px 40px rgba(0,0,0,0.18);
+      position:relative; cursor:pointer; transition:transform .45s ease, opacity .45s ease, box-shadow .3s ease;
+    }
+    .egg::before {
+      content: '';
+      position: absolute;
+      inset: 10px 15px auto;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.75);
+      opacity: 0.7;
+    }
+    .egg:hover { transform: translateY(-6px) scale(1.01); box-shadow: inset -12px -12px 30px rgba(0,0,0,0.12), 0 26px 45px rgba(0,0,0,0.22); }
+    .egg.broken { transform: translateY(18px) rotate(-12deg); opacity: 0; }
+    .crack { position:absolute; top:52px; left:50%; width:6px; height:170px; background: linear-gradient(180deg, #9b6a45, #c59568); transform-origin:top center; opacity:.85; }
+    .crack.left { transform: translateX(-3px) rotate(-12deg); }
+    .crack.right { transform: translateX(-3px) rotate(12deg); }
+    .shine { position:absolute; top:30px; left:38px; width:62px; height:30px; border-radius:60%; background:rgba(255,255,255,0.82); filter:blur(.8px); }
+    .photo {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .8s ease;
+    }
+    .photo img { width: 220px; height:220px; border-radius: 24px; box-shadow: 0 16px 36px rgba(0,0,0,.16); object-fit:cover; border: 4px solid #fff7fb; }
+    .photo.show { opacity:1; }
+    .hidden { display:none; }
+    .final-photo { width:100%; max-width:300px; border-radius:22px; margin: .8rem 0; box-shadow: 0 16px 36px rgba(0,0,0,.16); }
+    .wish-generator {
+      background: linear-gradient(135deg, #fff8fc 0%, #ffe8f1 100%);
+      border: 1px solid rgba(255,117,181,0.2);
+      border-radius: 18px;
+      padding: 1rem;
+      margin: 1rem 0 0.3rem;
+      text-align: left;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 6px 18px rgba(139,47,102,0.07);
+    }
+    .wish-generator h3 { margin:0 0 .3rem; color: var(--pink-dark); font-size: 1.1rem; }
+    .wish-generator p { margin:0 0 .8rem; color:#8b5f8c; font-size:.95rem; }
+    .wish-controls { display:grid; gap:.7rem; margin-bottom:.8rem; }
+    .wish-controls label { display:flex; flex-direction:column; gap:.35rem; font-size:.9rem; color:var(--text); font-weight:600; }
+    .wish-controls select {
+      border: 1px solid rgba(139,47,102,0.16);
+      border-radius: 10px;
+      padding: .7rem .75rem;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    .btn.small { padding: .78rem 1.1rem; font-size: .95rem; }
+    .wish-output {
+      margin-top: .8rem;
+      padding: .8rem .9rem;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(139,47,102,0.1);
+      border-radius: 12px;
+      color: var(--text);
+      line-height: 1.6;
+      font-size: .95rem;
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .wish-output.is-loading {
+      color: #b15c93;
+      font-style: italic;
+      opacity: 0.85;
+    }
+    .wish-output.is-revealed {
+      animation: wishPop 0.35s ease;
+    }
+    @keyframes wishPop {
+      0% { transform: scale(0.97); opacity: 0.65; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <section class="screen active" id="screen1">
+      <div class="emoji">🎂🎈</div>
+      <h1>Happy Birthday, GUDDU!</h1>
+      <p>A small surprise made just for you.</p>
+      <div class="card">
+        <p>Dear GUDDU,</p>
+        <p>May your day be full of love, smiles, and beautiful memories.</p>
+        <p>You deserve all the happiness today and always.</p>
+      </div>
+      <button class="btn" id="startBtn">Open your birthday surprise</button>
+      <p class="mini">Open this file in your browser on mobile and tap the button.</p>
+    </section>
+
+    <section class="screen" id="screen2">
+      <div class="confetti" id="confetti"></div>
+      <div class="emoji">🥚✨</div>
+      <h1>Birthday Egg Surprise</h1>
+      <p>Tap the egg to break it and reveal the surprise photo.</p>
+      <div class="egg-wrap">
+        <div class="egg" id="egg" role="button" tabindex="0" aria-label="Break the egg"></div>
+        <div class="crack left"></div>
+        <div class="crack right"></div>
+        <div class="shine"></div>
+        <div class="photo" id="photoWrap">
+          <img class="photo-image" src="guddu.jpg" alt="Birthday photo" />
+        </div>
+      </div>
+      <button class="btn" id="breakBtn">Break the birthday egg</button>
+    </section>
+
+    <section class="screen" id="screen3">
+      <div class="confetti" id="confetti2"></div>
+      <div class="emoji">🎉🥳</div>
+      <h1>Surprise Revealed!</h1>
+      <img class="final-photo photo-image" src="guddu.jpg" alt="Birthday surprise" />
+      <p>Thank you for opening this birthday surprise.</p>
+      <p>Wishing you a very happy and special day, GUDDU!</p>
+
+      <div class="wish-generator">
+        <h3>✨ AI Wish Helper</h3>
+        <p>Pick a mood and get a fresh birthday message in seconds.</p>
+        <div class="wish-controls">
+          <label>
+            <span>Vibe</span>
+            <select id="wishMood">
+              <option value="heartfelt">Heartfelt</option>
+              <option value="funny">Funny</option>
+              <option value="short">Short & sweet</option>
+            </select>
+          </label>
+          <label>
+            <span>Theme</span>
+            <select id="wishTheme">
+              <option value="love">Love & happiness</option>
+              <option value="dreams">Dreams & success</option>
+              <option value="celebration">Big celebration</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn small" id="generateWishBtn" type="button" onclick="generateWish()">Generate wish</button>
+        <div class="wish-output" id="wishOutput" aria-live="polite">Try a new mood and let the helper craft a sweet message for you.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function initBirthdayExperience() {
+      const startBtn = document.getElementById('startBtn');
+      const screen1 = document.getElementById('screen1');
+      const screen2 = document.getElementById('screen2');
+      const screen3 = document.getElementById('screen3');
+      const egg = document.getElementById('egg');
+      const photoWrap = document.getElementById('photoWrap');
+      const breakBtn = document.getElementById('breakBtn');
+      const confetti = document.getElementById('confetti');
+      const confetti2 = document.getElementById('confetti2');
+      const wishMood = document.getElementById('wishMood');
+      const wishTheme = document.getElementById('wishTheme');
+      const generateWishBtn = document.getElementById('generateWishBtn');
+      const wishOutput = document.getElementById('wishOutput');
+      let broken = false;
+
+      function showScreen(id) {
+        [screen1, screen2, screen3].forEach(screen => screen.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+      }
+
+    function spawnConfetti(container) {
+      for (let i = 0; i < 18; i += 1) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.width = `${8 + Math.random() * 6}px`;
+        piece.style.height = `${12 + Math.random() * 10}px`;
+        piece.style.background = ['#ff80bf', '#ffd1a9', '#ffe066', '#8ad3ff', '#b694ff'][Math.floor(Math.random() * 5)];
+        piece.style.setProperty('--drift', `${Math.random() * 140 - 70}px`);
+        piece.style.animationDuration = `${1.2 + Math.random() * 0.8}s`;
+        piece.style.animationDelay = `${Math.random() * 0.2}s`;
+        container.appendChild(piece);
+        piece.addEventListener('animationend', () => piece.remove());
+      }
+    }
+
+      function reveal() {
+        if (broken) return;
+        broken = true;
+        egg.classList.add('broken');
+        breakBtn.textContent = 'Surprise revealed!';
+        breakBtn.disabled = true;
+        spawnConfetti(confetti);
+        spawnConfetti(confetti2);
+        setTimeout(() => {
+          photoWrap.classList.add('show');
+        }, 500);
+        setTimeout(() => {
+          showScreen('screen3');
+        }, 1800);
+      }
+
+      function generateWish() {
+      const mood = wishMood.value;
+      const theme = wishTheme.value;
+      const messages = {
+        heartfelt: {
+          love: [
+            'You are the kind of person who makes every day feel warmer and brighter. May your birthday be filled with love, peace, and beautiful memories.',
+            'Your kindness lights up every room, and today is a beautiful reminder of how much joy you bring to the people around you.',
+            'May this birthday wrap you in comfort, love, and the sweet feeling of being truly cherished.'
+          ],
+          dreams: [
+            'May this year bring you closer to every dream you hold dear and fill your heart with courage, hope, and joy.',
+            'Here is to a year full of brave steps, beautiful surprises, and dreams turning into something wonderful.',
+            'May your hopes grow brighter and your path feel full of possibility and peace.'
+          ],
+          celebration: [
+            'Let this birthday be a celebration of all the kindness you carry and all the wonderful moments still waiting for you.',
+            'May your special day sparkle with laughter, love, and the kind of joy that stays with you long after the candles are gone.',
+            'Today is for celebrating your heart, your light, and the beautiful life you are building.'
+          ]
+        },
+        funny: {
+          love: [
+            'Hope your birthday is full of cake, laughter, and zero responsibilities for at least one whole day!',
+            'May your day be packed with silly smiles, sweet treats, and just enough chaos to keep it memorable.',
+            'Wishing you a birthday so fun it feels like the universe gave you a free pass to be extra fabulous.'
+          ],
+          dreams: [
+            'May your dreams be big, your coffee be strong, and your birthday be absolutely legendary.',
+            'Here is to chasing your goals with sparkle, confidence, and enough good energy to make the whole year shine.',
+            'May your goals be bold, your mood be bright, and your birthday be delightfully unforgettable.'
+          ],
+          celebration: [
+            'Wishing you a day packed with sparkle, silly laughs, and enough cake to make your heart happy.',
+            'May your birthday be full of confetti, giggles, and the kind of joy that makes you want to celebrate twice.',
+            'Hope your special day is bursting with fun, flavor, and a little bit of birthday magic.'
+          ]
+        },
+        short: {
+          love: [
+            'Happy birthday! May your day be sweet, your heart be light, and your smile stay bright.',
+            'Happy birthday! May your world feel warm, your spirit feel free, and your joy stay shining.',
+            'Happy birthday! May love find you in beautiful ways today and every day.'
+          ],
+          dreams: [
+            'Happy birthday! May this year bring you joy, success, and beautiful new adventures.',
+            'Happy birthday! May your dreams keep growing and your days keep glowing.',
+            'Happy birthday! May this year be full of bright moments and happy surprises.'
+          ],
+          celebration: [
+            'Happy birthday! Celebrate big, smile wide, and enjoy every magical moment.',
+            'Happy birthday! Let this day be full of sparkle, cheer, and sweet memories.',
+            'Happy birthday! Enjoy every beautiful second of your special day.'
+          ]
+        }
+      };
+
+        wishOutput.classList.add('is-loading');
+        wishOutput.classList.remove('is-revealed');
+        wishOutput.textContent = 'Creating a fresh birthday wish...';
+
+        window.setTimeout(() => {
+          const options = messages[mood]?.[theme];
+          const selectedMessage = Array.isArray(options) && options.length
+            ? options[Math.floor(Math.random() * options.length)]
+            : messages.heartfelt.love[0];
+
+          wishOutput.classList.remove('is-loading');
+          wishOutput.classList.add('is-revealed');
+          wishOutput.textContent = selectedMessage;
+
+          window.setTimeout(() => {
+            wishOutput.classList.remove('is-revealed');
+          }, 360);
+        }, 180);
+      }
+
+      if (startBtn) startBtn.addEventListener('click', () => showScreen('screen2'));
+      if (breakBtn) breakBtn.addEventListener('click', reveal);
+      if (egg) {
+        egg.addEventListener('click', reveal);
+        egg.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            reveal();
+          }
+        });
+      }
+
+      if (generateWishBtn) {
+        generateWishBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          generateWish();
+        });
+        generateWishBtn.onclick = (event) => {
+          event.preventDefault();
+          generateWish();
+        };
+      }
+
+      if (wishMood && wishTheme) {
+        [wishMood, wishTheme].forEach(select => select.addEventListener('change', generateWish));
+      }
+
+      window.generateWish = generateWish;
+      generateWish();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBirthdayExperience);
+    } else {
+      initBirthdayExperience();
+    }
+  </script>
+</body>
+</html>
